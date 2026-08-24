@@ -6,9 +6,12 @@
 
 namespace avernal {
 
+class Window;
+
 enum class Backend {
     null,
     d3d12,
+    vulkan,
 };
 
 enum class Format {
@@ -34,13 +37,15 @@ struct DeviceDesc {
     bool debug{true};
 
     [[nodiscard]] constexpr bool is_valid() const noexcept {
-        return backend == Backend::null || backend == Backend::d3d12;
+        return backend == Backend::null || backend == Backend::d3d12 ||
+               backend == Backend::vulkan;
     }
 };
 
 struct BufferDesc {
     std::uint64_t size{};
     BufferUsage usage{BufferUsage::none};
+    const void* data{};
 
     [[nodiscard]] constexpr bool is_valid() const noexcept {
         return size > 0 && usage != BufferUsage::none;
@@ -57,15 +62,65 @@ struct TextureDesc {
     }
 };
 
+struct GraphicsPipelineDesc {
+    Format color_format{Format::rgba8_unorm};
+    float color[4]{1.0f, 1.0f, 1.0f, 1.0f};
+};
+
 [[nodiscard]] constexpr std::string_view backend_name(Backend backend) noexcept {
     switch (backend) {
     case Backend::null:
         return "null";
     case Backend::d3d12:
         return "d3d12";
+    case Backend::vulkan:
+        return "vulkan";
     }
     return "unknown";
 }
+
+class Swapchain {
+public:
+    virtual ~Swapchain() = default;
+
+    [[nodiscard]] virtual std::uint32_t width() const noexcept = 0;
+    [[nodiscard]] virtual std::uint32_t height() const noexcept = 0;
+    [[nodiscard]] virtual Format format() const noexcept = 0;
+    virtual void resize(std::uint32_t width, std::uint32_t height) = 0;
+};
+
+class Buffer {
+public:
+    virtual ~Buffer() = default;
+};
+
+class Pipeline {
+public:
+    virtual ~Pipeline() = default;
+};
+
+class CommandList {
+public:
+    virtual ~CommandList() = default;
+
+    virtual void reset() = 0;
+    virtual void begin_render(Swapchain& swapchain) = 0;
+    virtual void clear_color(float r, float g, float b, float a) = 0;
+    virtual void set_pipeline(Pipeline& pipeline) = 0;
+    virtual void set_vertex_buffer(Buffer& buffer, std::uint32_t stride) = 0;
+    virtual void draw(std::uint32_t vertex_count) = 0;
+    virtual void end_render() = 0;
+    virtual void close() = 0;
+};
+
+class Queue {
+public:
+    virtual ~Queue() = default;
+
+    virtual void submit(CommandList& list) = 0;
+    virtual void present(Swapchain& swapchain) = 0;
+    virtual void wait_idle() = 0;
+};
 
 class Device {
 public:
@@ -73,8 +128,16 @@ public:
 
     [[nodiscard]] virtual Backend backend() const noexcept = 0;
     [[nodiscard]] virtual std::string_view adapter_name() const noexcept = 0;
+    [[nodiscard]] virtual Queue& graphics_queue() noexcept = 0;
+
+    [[nodiscard]] virtual std::unique_ptr<Swapchain> create_swapchain(const Window& window) = 0;
+    [[nodiscard]] virtual std::unique_ptr<Buffer> create_buffer(const BufferDesc& desc) = 0;
+    [[nodiscard]] virtual std::unique_ptr<Pipeline> create_graphics_pipeline(
+        const GraphicsPipelineDesc& desc) = 0;
+    [[nodiscard]] virtual std::unique_ptr<CommandList> create_command_list() = 0;
 };
 
+[[nodiscard]] std::unique_ptr<Device> create_device(const DeviceDesc& desc = {});
 [[nodiscard]] std::unique_ptr<Device> create_null_device();
 
 }  // namespace avernal

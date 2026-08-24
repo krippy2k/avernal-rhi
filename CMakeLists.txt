@@ -21,6 +21,12 @@ else()
     set(AVERNAL_CORE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../avernal-core")
 endif()
 
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../avernal-window/CMakeLists.txt")
+    set(AVERNAL_WINDOW_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../avernal-window")
+else()
+    set(AVERNAL_WINDOW_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../avernal-window")
+endif()
+
 if(NOT EXISTS "${AVERNAL_CORE_SOURCE_DIR}/CMakeLists.txt")
     message(FATAL_ERROR
         "avernal-core not found at:\n"
@@ -29,15 +35,29 @@ if(NOT EXISTS "${AVERNAL_CORE_SOURCE_DIR}/CMakeLists.txt")
         "FETCHCONTENT_SOURCE_DIR_AVERNAL_CORE.")
 endif()
 
+if(NOT EXISTS "${AVERNAL_WINDOW_SOURCE_DIR}/CMakeLists.txt")
+    message(FATAL_ERROR
+        "avernal-window not found at:\n"
+        "  ${AVERNAL_WINDOW_SOURCE_DIR}\n"
+        "Place avernal-window as a sibling of this project.")
+endif()
+
 FetchContent_Declare(
     avernal_core
     SOURCE_DIR "${AVERNAL_CORE_SOURCE_DIR}"
     EXCLUDE_FROM_ALL
 )
 
-set(AVERNAL_CORE_BUILD_DEMO OFF)
+FetchContent_Declare(
+    avernal_window
+    SOURCE_DIR "${AVERNAL_WINDOW_SOURCE_DIR}"
+    EXCLUDE_FROM_ALL
+)
 
-FetchContent_MakeAvailable(avernal_core)
+set(AVERNAL_CORE_BUILD_DEMO OFF)
+set(AVERNAL_WINDOW_BUILD_DEMO OFF)
+
+FetchContent_MakeAvailable(avernal_core avernal_window)
 
 add_library(avernal-rhi)
 add_library(avernal::rhi ALIAS avernal-rhi)
@@ -52,7 +72,7 @@ target_sources(
             include/avernal/rhi/rhi.hpp
 )
 
-target_link_libraries(avernal-rhi PUBLIC avernal::core)
+target_link_libraries(avernal-rhi PUBLIC avernal::core avernal::window)
 target_compile_features(avernal-rhi PUBLIC cxx_std_23)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
