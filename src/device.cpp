@@ -31,7 +31,7 @@ class NullCommandList final : public CommandList {
 public:
     void reset() override {}
     void begin_render(Swapchain&) override {}
-    void clear_color(float, float, float, float) override {}
+    void clear_color(const Color&) override {}
     void set_pipeline(Pipeline&) override {}
     void set_vertex_buffer(Buffer&, std::uint32_t) override {}
     void set_index_buffer(Buffer&) override {}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <avernal/math/color.hpp>
 #include <cstdint>
 #include <memory>
 #include <string_view>
@@ -65,7 +66,7 @@ struct TextureDesc {
 
 struct GraphicsPipelineDesc {
     Format color_format{Format::rgba8_unorm};
-    float color[4]{1.0f, 1.0f, 1.0f, 1.0f};
+    Color color{Color::white()};
     bool use_texture{false};
     bool use_depth{false};
     bool use_3d{false};  // Use 3D vertices (float3) with MVP transform
@@ -114,7 +115,7 @@ public:
 
     virtual void reset() = 0;
     virtual void begin_render(Swapchain& swapchain) = 0;
-    virtual void clear_color(float r, float g, float b, float a) = 0;
+    virtual void clear_color(const Color& color) = 0;
     virtual void set_pipeline(Pipeline& pipeline) = 0;
     virtual void set_vertex_buffer(Buffer& buffer, std::uint32_t stride) = 0;
     virtual void set_index_buffer(Buffer& buffer) = 0;

@@ -27,6 +27,12 @@ else()
     set(AVERNAL_WINDOW_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../avernal-window")
 endif()
 
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../avernal-math/CMakeLists.txt")
+    set(AVERNAL_MATH_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../avernal-math")
+else()
+    set(AVERNAL_MATH_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../avernal-math")
+endif()
+
 if(NOT EXISTS "${AVERNAL_CORE_SOURCE_DIR}/CMakeLists.txt")
     message(FATAL_ERROR
         "avernal-core not found at:\n"
@@ -42,6 +48,13 @@ if(NOT EXISTS "${AVERNAL_WINDOW_SOURCE_DIR}/CMakeLists.txt")
         "Place avernal-window as a sibling of this project.")
 endif()
 
+if(NOT EXISTS "${AVERNAL_MATH_SOURCE_DIR}/CMakeLists.txt")
+    message(FATAL_ERROR
+        "avernal-math not found at:\n"
+        "  ${AVERNAL_MATH_SOURCE_DIR}\n"
+        "Place avernal-math as a sibling of this project.")
+endif()
+
 FetchContent_Declare(
     avernal_core
     SOURCE_DIR "${AVERNAL_CORE_SOURCE_DIR}"
@@ -54,10 +67,17 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
 )
 
+FetchContent_Declare(
+    avernal_math
+    SOURCE_DIR "${AVERNAL_MATH_SOURCE_DIR}"
+    EXCLUDE_FROM_ALL
+)
+
 set(AVERNAL_CORE_BUILD_DEMO OFF)
 set(AVERNAL_WINDOW_BUILD_DEMO OFF)
+set(AVERNAL_MATH_BUILD_DEMO OFF)
 
-FetchContent_MakeAvailable(avernal_core avernal_window)
+FetchContent_MakeAvailable(avernal_core avernal_window avernal_math)
 
 add_library(avernal-rhi)
 add_library(avernal::rhi ALIAS avernal-rhi)
@@ -72,7 +92,7 @@ target_sources(
             include/avernal/rhi/rhi.hpp
 )
 
-target_link_libraries(avernal-rhi PUBLIC avernal::core avernal::window)
+target_link_libraries(avernal-rhi PUBLIC avernal::core avernal::window avernal::math)
 target_compile_features(avernal-rhi PUBLIC cxx_std_23)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
