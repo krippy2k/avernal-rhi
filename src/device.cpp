@@ -24,6 +24,7 @@ private:
 };
 
 class NullBuffer final : public Buffer {};
+class NullTexture final : public Texture {};
 class NullPipeline final : public Pipeline {};
 
 class NullCommandList final : public CommandList {
@@ -33,7 +34,11 @@ public:
     void clear_color(float, float, float, float) override {}
     void set_pipeline(Pipeline&) override {}
     void set_vertex_buffer(Buffer&, std::uint32_t) override {}
+    void set_index_buffer(Buffer&) override {}
+    void set_constant_buffer(Buffer&, std::uint32_t) override {}
+    void set_texture(Texture&) override {}
     void draw(std::uint32_t) override {}
+    void draw_indexed(std::uint32_t) override {}
     void end_render() override {}
     void close() override {}
 };
@@ -58,6 +63,11 @@ public:
     [[nodiscard]] std::unique_ptr<Buffer> create_buffer(const BufferDesc& desc) override {
         AV_ENSURE(desc.is_valid());
         return std::make_unique<NullBuffer>();
+    }
+
+    [[nodiscard]] std::unique_ptr<Texture> create_texture(const TextureDesc& desc) override {
+        AV_ENSURE(desc.is_valid());
+        return std::make_unique<NullTexture>();
     }
 
     [[nodiscard]] std::unique_ptr<Pipeline> create_graphics_pipeline(

@@ -56,6 +56,7 @@ struct TextureDesc {
     std::uint32_t width{1};
     std::uint32_t height{1};
     Format format{Format::rgba8_unorm};
+    const void* data{};
 
     [[nodiscard]] constexpr bool is_valid() const noexcept {
         return width > 0 && height > 0 && format != Format::unknown;
@@ -65,6 +66,9 @@ struct TextureDesc {
 struct GraphicsPipelineDesc {
     Format color_format{Format::rgba8_unorm};
     float color[4]{1.0f, 1.0f, 1.0f, 1.0f};
+    bool use_texture{false};
+    bool use_depth{false};
+    bool use_3d{false};  // Use 3D vertices (float3) with MVP transform
 };
 
 [[nodiscard]] constexpr std::string_view backend_name(Backend backend) noexcept {
@@ -94,6 +98,11 @@ public:
     virtual ~Buffer() = default;
 };
 
+class Texture {
+public:
+    virtual ~Texture() = default;
+};
+
 class Pipeline {
 public:
     virtual ~Pipeline() = default;
@@ -108,7 +117,11 @@ public:
     virtual void clear_color(float r, float g, float b, float a) = 0;
     virtual void set_pipeline(Pipeline& pipeline) = 0;
     virtual void set_vertex_buffer(Buffer& buffer, std::uint32_t stride) = 0;
+    virtual void set_index_buffer(Buffer& buffer) = 0;
+    virtual void set_constant_buffer(Buffer& buffer, std::uint32_t slot) = 0;
+    virtual void set_texture(Texture& texture) = 0;
     virtual void draw(std::uint32_t vertex_count) = 0;
+    virtual void draw_indexed(std::uint32_t index_count) = 0;
     virtual void end_render() = 0;
     virtual void close() = 0;
 };
@@ -132,6 +145,7 @@ public:
 
     [[nodiscard]] virtual std::unique_ptr<Swapchain> create_swapchain(const Window& window) = 0;
     [[nodiscard]] virtual std::unique_ptr<Buffer> create_buffer(const BufferDesc& desc) = 0;
+    [[nodiscard]] virtual std::unique_ptr<Texture> create_texture(const TextureDesc& desc) = 0;
     [[nodiscard]] virtual std::unique_ptr<Pipeline> create_graphics_pipeline(
         const GraphicsPipelineDesc& desc) = 0;
     [[nodiscard]] virtual std::unique_ptr<CommandList> create_command_list() = 0;
