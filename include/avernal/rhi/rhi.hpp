@@ -70,6 +70,9 @@ struct GraphicsPipelineDesc {
     bool use_texture{false};
     bool use_depth{false};
     bool use_3d{false};  // Use 3D vertices (float3) with MVP transform
+    bool use_pbr{false};
+    bool depth_only{false};
+    bool two_sided{false};
 };
 
 [[nodiscard]] constexpr std::string_view backend_name(Backend backend) noexcept {
@@ -115,13 +118,16 @@ public:
 
     virtual void reset() = 0;
     virtual void begin_render(Swapchain& swapchain) = 0;
+    virtual void begin_depth(Texture& depth) = 0;
     virtual void clear_color(const Color& color) = 0;
+    virtual void clear_depth(float depth = 1.0f) = 0;
     virtual void set_pipeline(Pipeline& pipeline) = 0;
     virtual void set_vertex_buffer(Buffer& buffer, std::uint32_t stride) = 0;
     virtual void set_index_buffer(Buffer& buffer) = 0;
     virtual void set_constant_buffer(Buffer& buffer, std::uint32_t slot) = 0;
-    virtual void set_texture(Texture& texture) = 0;
-    virtual void draw(std::uint32_t vertex_count) = 0;
+    virtual void set_texture(Texture& texture, std::uint32_t index = 0) = 0;
+    virtual void set_color(const Color& color) = 0;
+    virtual void draw(std::uint32_t vertex_count, std::uint32_t first_vertex = 0) = 0;
     virtual void draw_indexed(std::uint32_t index_count) = 0;
     virtual void end_render() = 0;
     virtual void close() = 0;

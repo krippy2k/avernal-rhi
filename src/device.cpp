@@ -31,13 +31,16 @@ class NullCommandList final : public CommandList {
 public:
     void reset() override {}
     void begin_render(Swapchain&) override {}
+    void begin_depth(Texture&) override {}
     void clear_color(const Color&) override {}
+    void clear_depth(float) override {}
     void set_pipeline(Pipeline&) override {}
     void set_vertex_buffer(Buffer&, std::uint32_t) override {}
     void set_index_buffer(Buffer&) override {}
     void set_constant_buffer(Buffer&, std::uint32_t) override {}
-    void set_texture(Texture&) override {}
-    void draw(std::uint32_t) override {}
+    void set_texture(Texture&, std::uint32_t) override {}
+    void set_color(const Color&) override {}
+    void draw(std::uint32_t, std::uint32_t) override {}
     void draw_indexed(std::uint32_t) override {}
     void end_render() override {}
     void close() override {}

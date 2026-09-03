@@ -27,6 +27,11 @@ TEST(TextureDesc, RejectsUnknownFormat) {
     EXPECT_FALSE((avernal::TextureDesc{.format = avernal::Format::unknown}.is_valid()));
 }
 
+TEST(TextureDesc, AcceptsDepthFormat) {
+    EXPECT_TRUE((avernal::TextureDesc{
+        .width = 64, .height = 64, .format = avernal::Format::d32_float}.is_valid()));
+}
+
 TEST(Backend, Names) {
     EXPECT_EQ(avernal::backend_name(avernal::Backend::null), "null");
     EXPECT_EQ(avernal::backend_name(avernal::Backend::d3d12), "d3d12");
@@ -59,7 +64,7 @@ TEST(Device, NullCreatesResources) {
     ASSERT_NE(commands, nullptr);
     commands->reset();
     commands->begin_render(*swapchain);
-    commands->clear_color(0.0f, 0.0f, 0.0f, 1.0f);
+    commands->clear_color({0.0f, 0.0f, 0.0f, 1.0f});
     commands->set_pipeline(*pipeline);
     commands->set_vertex_buffer(*buffer, 8);
     commands->draw(3);
